@@ -1,0 +1,55 @@
+{
+  "manifest_version": 3,
+  "name": "Element Remover Pro",
+  "version": "1.0.0",
+  "description": "Easily remove any unwanted elements from web pages. Clean up cluttered websites, remove ads, and customize your browsing experience.",
+  "author": "Your Name",
+  "homepage_url": "https://github.com/yourusername/element-remover-pro",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "action": {
+    "default_title": "Element Remover Pro",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "css": ["styles.css"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [{
+    "resources": ["languages.json"],
+    "matches": ["<all_urls>"]
+  }],
+  "commands": {
+    "undo": {
+      "suggested_key": {
+        "default": "Ctrl+Z",
+        "mac": "Command+Z"
+      },
+      "description": "Undo last removal"
+    },
+    "redo": {
+      "suggested_key": {
+        "default": "Ctrl+Y",
+        "mac": "Command+Shift+Z"
+      },
+      "description": "Redo last removal"
+    }
+  }
+} 

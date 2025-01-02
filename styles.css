@@ -1,0 +1,273 @@
+/* 懸停效果 */
+.element-remover-hover {
+  outline: 2px dashed #ff4444 !important;
+  outline-offset: -2px !important;
+  background-color: rgba(255, 68, 68, 0.1) !important;
+  cursor: crosshair !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* 選中效果 */
+.element-remover-selected {
+  outline: 2px solid #2196F3 !important;
+  outline-offset: -2px !important;
+  background-color: rgba(33, 150, 243, 0.1) !important;
+}
+
+/* 相似元素效果 */
+.element-remover-similar {
+  outline: 2px dashed #4CAF50 !important;
+  outline-offset: -2px !important;
+  background-color: rgba(76, 175, 80, 0.1) !important;
+}
+
+/* 浮動選單 */
+.element-remover-menu {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  width: 320px !important;
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  z-index: 2147483647 !important;
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto !important;
+  transition: all 0.3s ease !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+}
+
+.element-remover-header {
+  padding: 12px 16px !important;
+  background: #2196F3 !important;
+  color: white !important;
+  border-radius: 12px 12px 0 0 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  cursor: move !important;
+  user-select: none !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+}
+
+.element-remover-content {
+  padding: 16px !important;
+  max-height: calc(100vh - 200px) !important;
+  overflow-y: auto !important;
+}
+
+.header-actions {
+  display: flex !important;
+  gap: 8px !important;
+}
+
+.header-actions button {
+  background: none !important;
+  border: none !important;
+  color: white !important;
+  cursor: pointer !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  transition: background-color 0.2s !important;
+  font-size: 14px !important;
+}
+
+.header-actions button:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.pin-btn.active {
+  background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* 區段樣式 */
+.mode-section,
+.rules-section,
+.history-section,
+.settings-section,
+.language-section {
+  margin-bottom: 20px !important;
+  padding-bottom: 16px !important;
+  border-bottom: 1px solid #eee !important;
+}
+
+.mode-section h3,
+.rules-section h3,
+.history-section h3,
+.settings-section h3,
+.language-section h3 {
+  margin: 0 0 12px 0 !important;
+  font-size: 14px !important;
+  color: #333 !important;
+  font-weight: 600 !important;
+}
+
+/* 語言選擇器 */
+.language-selector {
+  width: 100% !important;
+}
+
+.language-select {
+  width: 100% !important;
+  padding: 8px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 6px !important;
+  background: white !important;
+  font-size: 14px !important;
+  color: #333 !important;
+  cursor: pointer !important;
+  outline: none !important;
+}
+
+/* 按鈕組 */
+.mode-buttons,
+.rules-actions,
+.history-actions {
+  display: flex !important;
+  gap: 8px !important;
+  margin-top: 8px !important;
+  flex-wrap: wrap !important;
+}
+
+/* 按鈕樣式 */
+.mode-btn,
+.rules-actions button,
+.history-actions button {
+  flex: 1 !important;
+  min-width: 80px !important;
+  padding: 8px 12px !important;
+  border: 1px solid #2196F3 !important;
+  background: white !important;
+  color: #2196F3 !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  font-size: 13px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  text-align: center !important;
+}
+
+.mode-btn:hover,
+.rules-actions button:hover,
+.history-actions button:hover {
+  background: #e3f2fd !important;
+}
+
+.mode-btn.active {
+  background: #2196F3 !important;
+  color: white !important;
+}
+
+/* 開關樣式 */
+.switch-label {
+  display: flex !important;
+  align-items: center !important;
+  margin: 8px 0 !important;
+  cursor: pointer !important;
+  font-size: 13px !important;
+  color: #333 !important;
+  padding: 4px 0 !important;
+}
+
+.switch-label input[type="checkbox"] {
+  margin-right: 8px !important;
+}
+
+/* 危險按鈕 */
+button.danger {
+  border-color: #ff4444 !important;
+  color: #ff4444 !important;
+}
+
+button.danger:hover {
+  background: #ffebee !important;
+}
+
+/* 圖標按鈕 */
+.icon-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+}
+
+/* 通知樣式 */
+.element-remover-notification {
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background: rgba(33, 150, 243, 0.9) !important;
+  color: white !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  z-index: 2147483648 !important;
+  animation: notification-slide-up 0.3s ease-out !important;
+  white-space: nowrap !important;
+  max-width: 90vw !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+@keyframes notification-slide-up {
+  from {
+    transform: translate(-50%, 100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+/* 滾動條樣式 */
+.element-remover-content::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+.element-remover-content::-webkit-scrollbar-track {
+  background: #f1f1f1 !important;
+  border-radius: 4px !important;
+}
+
+.element-remover-content::-webkit-scrollbar-thumb {
+  background: #888 !important;
+  border-radius: 4px !important;
+}
+
+.element-remover-content::-webkit-scrollbar-thumb:hover {
+  background: #555 !important;
+}
+
+/* 結束刪除按鈕區段 */
+.stop-section {
+  margin-bottom: 20px !important;
+  padding-bottom: 16px !important;
+  border-bottom: 1px solid #eee !important;
+}
+
+.stop-btn {
+  width: 100% !important;
+  padding: 12px !important;
+  border: 2px solid #ff4444 !important;
+  background: white !important;
+  color: #ff4444 !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+.stop-btn:hover {
+  background: #ff4444 !important;
+  color: white !important;
+} 
