@@ -15,6 +15,7 @@
     "redo": "Redo",
     "clear": "Clear",
     "stopRemoving": "Stop Removing",
+    "languageSettings": "Language Settings",
     "notifications": {
       "modeChanged": "Mode changed to {mode}",
       "elementRemoved": "Element removed",
@@ -25,7 +26,8 @@
       "noMoreRedo": "Nothing to redo",
       "historyCleared": "History cleared",
       "shiftClickTip": "Hold Shift + Click anywhere to delete selected elements",
-      "removingStopped": "Element removal mode stopped"
+      "removingStopped": "Element removal mode stopped",
+      "selectedCount": "{count} elements selected"
     }
   },
   "zh": {
@@ -44,6 +46,7 @@
     "redo": "重做",
     "clear": "清除",
     "stopRemoving": "結束刪除",
+    "languageSettings": "語言設定",
     "notifications": {
       "modeChanged": "已切換至{mode}模式",
       "elementRemoved": "已移除元素",
@@ -54,7 +57,8 @@
       "noMoreRedo": "沒有可重做的動作",
       "historyCleared": "已清除歷史記錄",
       "shiftClickTip": "按住 Shift 鍵並點擊任意位置以刪除已選擇的元素",
-      "removingStopped": "已結束元素刪除模式"
+      "removingStopped": "已結束元素刪除模式",
+      "selectedCount": "已選擇 {count} 個元素"
     }
   },
   "ja": {
@@ -73,6 +77,7 @@
     "redo": "やり直す",
     "clear": "クリア",
     "stopRemoving": "削除を終了",
+    "languageSettings": "言語設定",
     "notifications": {
       "modeChanged": "{mode}モードに変更しました",
       "elementRemoved": "要素を削除しました",
@@ -83,7 +88,8 @@
       "noMoreRedo": "これ以上やり直せません",
       "historyCleared": "履歴をクリアしました",
       "shiftClickTip": "Shiftキーを押しながら任意の場所をクリックして選択した要素を削除",
-      "removingStopped": "要素削除モードを終了しました"
+      "removingStopped": "要素削除モードを終了しました",
+      "selectedCount": "{count}個の要素を選択しました"
     }
   },
   "ko": {
@@ -102,6 +108,7 @@
     "redo": "다시 실행",
     "clear": "지우기",
     "stopRemoving": "제거 중지",
+    "languageSettings": "언어 설정",
     "notifications": {
       "modeChanged": "{mode} 모드로 변경되었습니다",
       "elementRemoved": "요소가 제거되었습니다",
@@ -112,7 +119,8 @@
       "noMoreRedo": "더 이상 다시 실행할 수 없습니다",
       "historyCleared": "기록이 지워졌습니다",
       "shiftClickTip": "Shift 키를 누른 상태에서 아무 곳이나 클릭하여 선택한 요소 삭제",
-      "removingStopped": "요소 제거 모드가 중지되었습니다"
+      "removingStopped": "요소 제거 모드가 중지되었습니다",
+      "selectedCount": "{count}개의 요소가 선택되었습니다"
     }
   },
   "ru": {
@@ -131,6 +139,7 @@
     "redo": "Повторить",
     "clear": "Очистить",
     "stopRemoving": "Остановить удаление",
+    "languageSettings": "Настройки языка",
     "notifications": {
       "modeChanged": "Режим изменен на {mode}",
       "elementRemoved": "Элемент удален",
@@ -141,7 +150,8 @@
       "noMoreRedo": "Нечего повторять",
       "historyCleared": "История очищена",
       "shiftClickTip": "Удерживайте Shift и кликните в любом месте для удаления выбранных элементов",
-      "removingStopped": "Режим удаления элементов остановлен"
+      "removingStopped": "Режим удаления элементов остановлен",
+      "selectedCount": "Выбрано элементов: {count}"
     }
   },
   "es": {
@@ -160,6 +170,7 @@
     "redo": "Rehacer",
     "clear": "Limpiar",
     "stopRemoving": "Detener eliminación",
+    "languageSettings": "Configuración de idioma",
     "notifications": {
       "modeChanged": "Modo cambiado a {mode}",
       "elementRemoved": "Elemento eliminado",
@@ -170,7 +181,8 @@
       "noMoreRedo": "Nada para rehacer",
       "historyCleared": "Historial limpiado",
       "shiftClickTip": "Mantén presionado Shift y haz clic en cualquier lugar para eliminar los elementos seleccionados",
-      "removingStopped": "Modo de eliminación de elementos detenido"
+      "removingStopped": "Modo de eliminación de elementos detenido",
+      "selectedCount": "{count} elementos seleccionados"
     }
   }
 } 

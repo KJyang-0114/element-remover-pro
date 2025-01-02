@@ -220,7 +220,7 @@ class ElementManager {
     languageSection.className = 'language-section';
     
     const languageTitle = document.createElement('h3');
-    languageTitle.textContent = 'Language Settings';
+    languageTitle.textContent = this.getText('languageSettings');
     languageSection.appendChild(languageTitle);
     
     const languageSelect = document.createElement('select');
@@ -571,9 +571,11 @@ class ElementManager {
         } else {
           // 一般點擊 = 選擇元素
           this.toggleElementSelection(target);
-          // 顯示多重選擇模式的提示
+          // 當選擇第一個元素時顯示提示
           if (this.selectedElements.size === 1) {
-            this.showNotification('shiftClickTip');
+            setTimeout(() => {
+              this.showNotification('notifications.shiftClickTip');
+            }, 500);
           }
         }
       } else if (this.currentMode === 'similar') {
@@ -849,7 +851,10 @@ class ElementManager {
         break;
       case 'multi':
         modeText = this.getText('multiMode');
-        this.showNotification('shiftClickTip');
+        // 立即顯示多選模式的操作提示
+        setTimeout(() => {
+          this.showNotification('notifications.shiftClickTip');
+        }, 1000);
         break;
       case 'similar':
         modeText = this.getText('similarMode');
