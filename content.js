@@ -4,6 +4,7 @@ class ElementManager {
     this.currentMode = 'single';
     this.selectedElements = new Set();
     this.removedElements = new Map();
+    this.redoStack = new Map();
     this.savedRules = new Map();
     
     // 支援的語言列表
@@ -20,18 +21,15 @@ class ElementManager {
     this.currentLang = this.loadLanguagePreference() || navigator.language.toLowerCase().split('-')[0] || 'en';
     this.i18n = {};
     
-    // 添加語言設定到設置中
+    // 設定
     this.settings = {
-      rememberRules: true,
-      autoApplyRules: false,
+      autoHide: false,
       smartSelect: false,
-      showIndicator: true,
       language: this.currentLang
     };
     
     this.floatingMenu = null;
     this.isMenuVisible = false;
-    this.currentDomain = window.location.hostname;
   }
 
   async init() {
@@ -82,6 +80,7 @@ class ElementManager {
     const menu = document.createElement('div');
     menu.className = 'element-remover-menu';
     
+    // 標題區域
     const header = document.createElement('div');
     header.className = 'element-remover-header';
     header.textContent = this.getText('menuTitle');
@@ -94,14 +93,17 @@ class ElementManager {
     minimizeBtn.title = this.getText('minimize');
     minimizeBtn.onclick = () => this.toggleMenuMinimize();
     
-    const pinBtn = document.createElement('button');
-    pinBtn.className = 'pin-btn';
-    pinBtn.textContent = '📌';
-    pinBtn.title = this.getText('pin');
-    pinBtn.onclick = () => this.toggleMenuPin();
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'close-btn';
+    closeBtn.textContent = '×';
+    closeBtn.title = this.getText('close');
+    closeBtn.onclick = () => {
+      this.deactivate();
+      this.hideMenu();
+    };
     
     headerActions.appendChild(minimizeBtn);
-    headerActions.appendChild(pinBtn);
+    headerActions.appendChild(closeBtn);
     header.appendChild(headerActions);
     
     const content = document.createElement('div');
@@ -142,7 +144,7 @@ class ElementManager {
     
     modes.forEach(mode => {
       const button = document.createElement('button');
-      button.className = 'mode-btn icon-button';
+      button.className = 'mode-btn';
       button.dataset.mode = mode.id;
       button.innerHTML = `${mode.icon} ${mode.label}`;
       button.onclick = () => this.setMode(mode.id);
@@ -164,18 +166,18 @@ class ElementManager {
     autoHideLabel.className = 'switch-label';
     autoHideLabel.innerHTML = `
       <input type="checkbox" id="autoHide">
-      ${this.getText('autoHide')}
+      <span>${this.getText('autoHide')}</span>
     `;
-    rulesSection.appendChild(autoHideLabel);
     
     const smartSelectLabel = document.createElement('label');
     smartSelectLabel.className = 'switch-label';
     smartSelectLabel.innerHTML = `
       <input type="checkbox" id="smartSelect">
-      ${this.getText('smartSelect')}
+      <span>${this.getText('smartSelect')}</span>
     `;
-    rulesSection.appendChild(smartSelectLabel);
     
+    rulesSection.appendChild(autoHideLabel);
+    rulesSection.appendChild(smartSelectLabel);
     content.appendChild(rulesSection);
     
     // 歷史記錄區段
@@ -190,23 +192,17 @@ class ElementManager {
     historyActions.className = 'history-actions';
     
     const undoBtn = document.createElement('button');
-    undoBtn.className = 'icon-button';
+    undoBtn.className = 'history-btn';
     undoBtn.innerHTML = '↩️ ' + this.getText('undo');
     undoBtn.onclick = () => this.undo();
     
     const redoBtn = document.createElement('button');
-    redoBtn.className = 'icon-button';
+    redoBtn.className = 'history-btn';
     redoBtn.innerHTML = '↪️ ' + this.getText('redo');
     redoBtn.onclick = () => this.redo();
     
-    const clearBtn = document.createElement('button');
-    clearBtn.className = 'icon-button danger';
-    clearBtn.innerHTML = '🗑️ ' + this.getText('clear');
-    clearBtn.onclick = () => this.clearHistory();
-    
     historyActions.appendChild(undoBtn);
     historyActions.appendChild(redoBtn);
-    historyActions.appendChild(clearBtn);
     historySection.appendChild(historyActions);
     content.appendChild(historySection);
     
@@ -215,48 +211,28 @@ class ElementManager {
     languageSection.className = 'language-section';
     
     const languageTitle = document.createElement('h3');
-    languageTitle.textContent = 'Language Settings';  // 固定使用英文
+    languageTitle.textContent = 'Language Settings';
     languageSection.appendChild(languageTitle);
-    
-    const languageSelector = document.createElement('div');
-    languageSelector.className = 'language-selector';
     
     const languageSelect = document.createElement('select');
     languageSelect.className = 'language-select';
     
-    const languages = [
-      { code: 'en', name: 'English' },
-      { code: 'zh', name: '中文' },
-      { code: 'ja', name: '日本語' },
-      { code: 'ko', name: '한국어' },
-      { code: 'ru', name: 'Русский' },
-      { code: 'es', name: 'Español' },
-      { code: 'fr', name: 'Français' },
-      { code: 'de', name: 'Deutsch' },
-      { code: 'it', name: 'Italiano' },
-      { code: 'pt', name: 'Português' },
-      { code: 'ar', name: 'العربية' },
-      { code: 'hi', name: 'हिन्दी' },
-      { code: 'th', name: 'ไทย' },
-      { code: 'vi', name: 'Tiếng Việt' }
-    ];
-    
-    languages.forEach(lang => {
+    Object.entries(this.supportedLanguages).forEach(([code, name]) => {
       const option = document.createElement('option');
-      option.value = lang.code;
-      option.textContent = lang.name;
+      option.value = code;
+      option.textContent = name;
+      if (code === this.currentLang) {
+        option.selected = true;
+      }
       languageSelect.appendChild(option);
     });
     
-    languageSelect.value = this.currentLang;
     languageSelect.onchange = (e) => {
-      this.currentLang = e.target.value;
-      chrome.storage.sync.set({ language: this.currentLang });
+      this.saveLanguagePreference(e.target.value);
       this.updateMenuText();
     };
     
-    languageSelector.appendChild(languageSelect);
-    languageSection.appendChild(languageSelector);
+    languageSection.appendChild(languageSelect);
     content.appendChild(languageSection);
     
     menu.appendChild(header);
@@ -264,88 +240,84 @@ class ElementManager {
     document.body.appendChild(menu);
     
     this.makeDraggable(menu, header);
+    this.setupMenuListeners();
+    
     return menu;
   }
 
   setupMenuListeners() {
     const menu = this.floatingMenu;
+    if (!menu) return;
 
-    // 語言選擇
-    menu.querySelector('#languageSelect').addEventListener('change', (e) => {
-      const newLang = e.target.value;
-      this.saveLanguagePreference(newLang);
-      this.showNotification('languageChanged', { lang: this.supportedLanguages[newLang] });
-    });
-
-    // 關閉按鈕
-    menu.querySelector('.close-btn').addEventListener('click', () => {
-      this.hideMenu();
-      this.deactivate();
-    });
-
-    // 釘選按鈕
-    menu.querySelector('.pin-btn').addEventListener('click', (e) => {
-      const btn = e.target;
-      btn.classList.toggle('active');
-      this.settings.keepMenuOpen = btn.classList.contains('active');
-      this.saveSettings();
-    });
-
-    // 模式選擇
+    // 模式選擇按鈕
     menu.querySelectorAll('.mode-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.onclick = () => {
         menu.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         this.setMode(btn.dataset.mode);
-      });
+      };
     });
 
     // 規則設定
-    menu.querySelector('#rememberRules').addEventListener('change', (e) => {
-      this.settings.rememberRules = e.target.checked;
-      this.saveSettings();
-    });
+    const autoHideCheckbox = menu.querySelector('#autoHide');
+    if (autoHideCheckbox) {
+      autoHideCheckbox.checked = this.settings.autoHide;
+      autoHideCheckbox.onchange = (e) => {
+        this.settings.autoHide = e.target.checked;
+        this.saveSettings();
+      };
+    }
 
-    menu.querySelector('#autoApplyRules').addEventListener('change', (e) => {
-      this.settings.autoApplyRules = e.target.checked;
-      this.saveSettings();
-    });
+    const smartSelectCheckbox = menu.querySelector('#smartSelect');
+    if (smartSelectCheckbox) {
+      smartSelectCheckbox.checked = this.settings.smartSelect;
+      smartSelectCheckbox.onchange = (e) => {
+        this.settings.smartSelect = e.target.checked;
+        this.saveSettings();
+      };
+    }
 
-    menu.querySelector('#saveCurrentRules').addEventListener('click', () => {
-      this.saveCurrentRules();
-    });
+    // 歷史操作按鈕
+    const undoBtn = menu.querySelector('.history-actions button:first-child');
+    if (undoBtn) {
+      undoBtn.onclick = () => this.undo();
+    }
 
-    menu.querySelector('#clearSiteRules').addEventListener('click', () => {
-      this.clearSiteRules();
-    });
+    const redoBtn = menu.querySelector('.history-actions button:last-child');
+    if (redoBtn) {
+      redoBtn.onclick = () => this.redo();
+    }
 
-    // 歷史操作
-    menu.querySelector('#undoBtn').addEventListener('click', () => this.undo());
-    menu.querySelector('#redoBtn').addEventListener('click', () => this.redo());
-    menu.querySelector('#resetAll').addEventListener('click', () => this.resetPage());
+    // 語言選擇
+    const languageSelect = menu.querySelector('.language-select');
+    if (languageSelect) {
+      languageSelect.value = this.currentLang;
+      languageSelect.onchange = (e) => {
+        this.saveLanguagePreference(e.target.value);
+      };
+    }
 
-    // 進階設定
-    menu.querySelector('#smartSelect').addEventListener('change', (e) => {
-      this.settings.smartSelect = e.target.checked;
-      this.saveSettings();
-    });
-
-    menu.querySelector('#showIndicator').addEventListener('change', (e) => {
-      this.settings.showIndicator = e.target.checked;
-      this.saveSettings();
-    });
+    // 停止按鈕
+    const stopBtn = menu.querySelector('.stop-btn');
+    if (stopBtn) {
+      stopBtn.onclick = () => {
+        this.deactivate();
+        this.hideMenu();
+        this.showNotification('notifications.removingStopped');
+      };
+    }
   }
 
   showMenu() {
     if (!this.floatingMenu) {
-      this.createFloatingMenu();
+      this.floatingMenu = this.createFloatingMenu();
     }
     this.floatingMenu.style.display = 'block';
     this.isMenuVisible = true;
   }
 
   hideMenu() {
-    if (this.floatingMenu && !this.settings.keepMenuOpen) {
+    if (this.floatingMenu) {
       this.floatingMenu.style.display = 'none';
       this.isMenuVisible = false;
     }
@@ -736,24 +708,23 @@ class ElementManager {
 
   toggleMenu() {
     console.log('toggleMenu called');  // 添加日誌
+    
     if (!this.floatingMenu) {
       console.log('Creating new menu');  // 添加日誌
-      this.createFloatingMenu();
-      this.floatingMenu.style.display = 'block';
-      this.isMenuVisible = true;
+      this.floatingMenu = this.createFloatingMenu();
+      this.showMenu();
       this.activate();
     } else {
       console.log('Toggling existing menu');  // 添加日誌
       if (this.isMenuVisible) {
-        this.floatingMenu.style.display = 'none';
-        this.isMenuVisible = false;
+        this.hideMenu();
         this.deactivate();
       } else {
-        this.floatingMenu.style.display = 'block';
-        this.isMenuVisible = true;
+        this.showMenu();
         this.activate();
       }
     }
+    
     console.log('Menu visibility:', this.isMenuVisible);  // 添加日誌
   }
 
@@ -846,27 +817,35 @@ elementManager.init();
 
 // 監聽來自 background 的消息
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  switch (request.action) {
-    case 'toggleSelector':
-      elementManager.toggleMenu();
-      break;
-    case 'setMode':
-      elementManager.setMode(request.mode);
-      break;
-    case 'undo':
-      elementManager.undo();
-      break;
-    case 'redo':
-      elementManager.redo();
-      break;
-    case 'setAutoHide':
-      elementManager.updateSettings({ autoHide: request.enabled });
-      break;
-    case 'setSmartSelect':
-      elementManager.updateSettings({ smartSelect: request.enabled });
-      break;
-    case 'setSaveRules':
-      elementManager.updateSettings({ saveRules: request.enabled });
-      break;
+  console.log('Received message:', request);  // 添加日誌
+  
+  try {
+    switch (request.action) {
+      case 'toggleSelector':
+        console.log('Toggling selector');  // 添加日誌
+        elementManager.toggleMenu();
+        sendResponse({ success: true });
+        break;
+      case 'setMode':
+        elementManager.setMode(request.mode);
+        sendResponse({ success: true });
+        break;
+      case 'undo':
+        elementManager.undo();
+        sendResponse({ success: true });
+        break;
+      case 'redo':
+        elementManager.redo();
+        sendResponse({ success: true });
+        break;
+      default:
+        console.log('Unknown action:', request.action);  // 添加日誌
+        sendResponse({ success: false, error: 'Unknown action' });
+    }
+  } catch (error) {
+    console.error('Error handling message:', error);  // 添加錯誤日誌
+    sendResponse({ success: false, error: error.message });
   }
+  
+  return true;  // 保持消息通道開啟
 }); 

@@ -86,6 +86,35 @@
       "removingStopped": "要素削除モードを終了しました"
     }
   },
+  "ko": {
+    "menuTitle": "요소 제거 도구",
+    "minimize": "최소화",
+    "pin": "메뉴 고정",
+    "selectMode": "선택 모드",
+    "singleMode": "단일",
+    "multiMode": "다중",
+    "similarMode": "유사",
+    "rules": "규칙 설정",
+    "autoHide": "유사 요소 자동 숨김",
+    "smartSelect": "스마트 선택",
+    "history": "작업 기록",
+    "undo": "실행 취소",
+    "redo": "다시 실행",
+    "clear": "지우기",
+    "stopRemoving": "제거 중지",
+    "notifications": {
+      "modeChanged": "{mode} 모드로 변경되었습니다",
+      "elementRemoved": "요소가 제거되었습니다",
+      "elementsRemoved": "{count}개의 요소가 제거되었습니다",
+      "undoSuccess": "마지막 작업이 취소되었습니다",
+      "redoSuccess": "작업이 다시 실행되었습니다",
+      "noMoreUndo": "더 이상 취소할 수 없습니다",
+      "noMoreRedo": "더 이상 다시 실행할 수 없습니다",
+      "historyCleared": "기록이 지워졌습니다",
+      "shiftClickTip": "Shift 키를 누른 상태에서 아무 곳이나 클릭하여 선택한 요소 삭제",
+      "removingStopped": "요소 제거 모드가 중지되었습니다"
+    }
+  },
   "ru": {
     "menuTitle": "Удаление элементов",
     "minimize": "Свернуть",
@@ -113,6 +142,35 @@
       "historyCleared": "История очищена",
       "shiftClickTip": "Удерживайте Shift и кликните в любом месте для удаления выбранных элементов",
       "removingStopped": "Режим удаления элементов остановлен"
+    }
+  },
+  "es": {
+    "menuTitle": "Eliminador de Elementos",
+    "minimize": "Minimizar",
+    "pin": "Fijar Menú",
+    "selectMode": "Modo de Selección",
+    "singleMode": "Individual",
+    "multiMode": "Múltiple",
+    "similarMode": "Similar",
+    "rules": "Reglas",
+    "autoHide": "Ocultar elementos similares",
+    "smartSelect": "Selección inteligente",
+    "history": "Historial",
+    "undo": "Deshacer",
+    "redo": "Rehacer",
+    "clear": "Limpiar",
+    "stopRemoving": "Detener eliminación",
+    "notifications": {
+      "modeChanged": "Modo cambiado a {mode}",
+      "elementRemoved": "Elemento eliminado",
+      "elementsRemoved": "{count} elementos eliminados",
+      "undoSuccess": "Última acción deshecha",
+      "redoSuccess": "Acción rehecha",
+      "noMoreUndo": "Nada para deshacer",
+      "noMoreRedo": "Nada para rehacer",
+      "historyCleared": "Historial limpiado",
+      "shiftClickTip": "Mantén presionado Shift y haz clic en cualquier lugar para eliminar los elementos seleccionados",
+      "removingStopped": "Modo de eliminación de elementos detenido"
     }
   }
 } 
