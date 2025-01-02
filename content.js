@@ -19,7 +19,7 @@ class ElementManager {
     
     // 多語言支援
     this.currentLang = this.loadLanguagePreference() || navigator.language.toLowerCase().split('-')[0] || 'en';
-    this.i18n = {};
+    this.i18n = null;  // 初始化為 null
     
     // 設定
     this.settings = {
@@ -35,20 +35,23 @@ class ElementManager {
   async init() {
     await this.loadLanguages();
     this.setupEventListeners();
-    this.loadSavedRules();
-    if (this.settings.autoApplyRules) {
-      this.applyRules();
-    }
   }
 
   async loadLanguages() {
     try {
       const response = await fetch(chrome.runtime.getURL('languages.json'));
       this.i18n = await response.json();
+      console.log('Languages loaded:', this.i18n);  // 添加日誌
     } catch (error) {
       console.error('Error loading languages:', error);
-      // 如果加載失敗，使用英文作為備用
+      // 如果加載失敗，使用預設的英文
       this.currentLang = 'en';
+      this.i18n = {
+        en: {
+          menuTitle: "Element Remover Pro",
+          // ... 其他預設英文翻譯
+        }
+      };
     }
   }
 
@@ -79,6 +82,9 @@ class ElementManager {
   createFloatingMenu() {
     const menu = document.createElement('div');
     menu.className = 'element-remover-menu';
+    menu.style.position = 'fixed';
+    menu.style.left = '20px';
+    menu.style.top = '20px';
     
     // 標題區域
     const header = document.createElement('div');
@@ -145,6 +151,9 @@ class ElementManager {
     modes.forEach(mode => {
       const button = document.createElement('button');
       button.className = 'mode-btn';
+      if (mode.id === this.currentMode) {
+        button.classList.add('active');
+      }
       button.dataset.mode = mode.id;
       button.innerHTML = `${mode.icon} ${mode.label}`;
       button.onclick = () => this.setMode(mode.id);
@@ -239,10 +248,53 @@ class ElementManager {
     menu.appendChild(content);
     document.body.appendChild(menu);
     
-    this.makeDraggable(menu, header);
+    // 修正拖曳功能
+    this.makeDraggable(menu);
     this.setupMenuListeners();
     
     return menu;
+  }
+
+  makeDraggable(menu) {
+    const header = menu.querySelector('.element-remover-header');
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    const dragStart = (e) => {
+      initialX = e.clientX - xOffset;
+      initialY = e.clientY - yOffset;
+
+      if (e.target === header) {
+        isDragging = true;
+      }
+    };
+
+    const dragEnd = () => {
+      isDragging = false;
+    };
+
+    const drag = (e) => {
+      if (isDragging) {
+        e.preventDefault();
+        
+        currentX = e.clientX - initialX;
+        currentY = e.clientY - initialY;
+
+        xOffset = currentX;
+        yOffset = currentY;
+
+        menu.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+      }
+    };
+
+    header.addEventListener('mousedown', dragStart);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', dragEnd);
   }
 
   setupMenuListeners() {
@@ -251,60 +303,60 @@ class ElementManager {
 
     // 模式選擇按鈕
     menu.querySelectorAll('.mode-btn').forEach(btn => {
-      btn.onclick = () => {
+      btn.addEventListener('click', () => {
         menu.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         this.setMode(btn.dataset.mode);
-      };
+      });
     });
 
     // 規則設定
     const autoHideCheckbox = menu.querySelector('#autoHide');
     if (autoHideCheckbox) {
       autoHideCheckbox.checked = this.settings.autoHide;
-      autoHideCheckbox.onchange = (e) => {
+      autoHideCheckbox.addEventListener('change', (e) => {
         this.settings.autoHide = e.target.checked;
         this.saveSettings();
-      };
+      });
     }
 
     const smartSelectCheckbox = menu.querySelector('#smartSelect');
     if (smartSelectCheckbox) {
       smartSelectCheckbox.checked = this.settings.smartSelect;
-      smartSelectCheckbox.onchange = (e) => {
+      smartSelectCheckbox.addEventListener('change', (e) => {
         this.settings.smartSelect = e.target.checked;
         this.saveSettings();
-      };
+      });
     }
 
     // 歷史操作按鈕
     const undoBtn = menu.querySelector('.history-actions button:first-child');
     if (undoBtn) {
-      undoBtn.onclick = () => this.undo();
+      undoBtn.addEventListener('click', () => this.undo());
     }
 
     const redoBtn = menu.querySelector('.history-actions button:last-child');
     if (redoBtn) {
-      redoBtn.onclick = () => this.redo();
+      redoBtn.addEventListener('click', () => this.redo());
     }
 
     // 語言選擇
     const languageSelect = menu.querySelector('.language-select');
     if (languageSelect) {
       languageSelect.value = this.currentLang;
-      languageSelect.onchange = (e) => {
+      languageSelect.addEventListener('change', (e) => {
         this.saveLanguagePreference(e.target.value);
-      };
+      });
     }
 
     // 停止按鈕
     const stopBtn = menu.querySelector('.stop-btn');
     if (stopBtn) {
-      stopBtn.onclick = () => {
+      stopBtn.addEventListener('click', () => {
         this.deactivate();
         this.hideMenu();
         this.showNotification('notifications.removingStopped');
-      };
+      });
     }
   }
 
@@ -393,12 +445,29 @@ class ElementManager {
   }
 
   showNotification(messageKey, params = {}) {
-    const message = this.getText(`messages.${messageKey}`, params);
-    const notification = document.createElement('div');
-    notification.className = 'element-remover-notification';
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    setTimeout(() => notification.remove(), 2000);
+    try {
+      const message = this.getText(messageKey, params);
+      
+      // 移除舊的通知
+      const oldNotification = document.querySelector('.element-remover-notification');
+      if (oldNotification) {
+        oldNotification.remove();
+      }
+      
+      const notification = document.createElement('div');
+      notification.className = 'element-remover-notification';
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      // 2秒後自動移除
+      setTimeout(() => {
+        if (notification && notification.parentNode) {
+          notification.remove();
+        }
+      }, 2000);
+    } catch (error) {
+      console.error('Error showing notification:', error);
+    }
   }
 
   setupDraggable(menu) {
@@ -443,9 +512,6 @@ class ElementManager {
   handleMouseMove(e) {
     if (!this.isActive) return;
     
-    e.preventDefault();
-    e.stopPropagation();
-    
     const target = e.target;
 
     // 不處理選單相關元素
@@ -453,16 +519,16 @@ class ElementManager {
       this.clearHighlight();
       return;
     }
-    
+
     // 檢查是否為可刪除的元素
     if (!this.isValidTarget(target)) {
       this.clearHighlight();
       return;
     }
-    
+
     // 移除之前的高亮
     this.clearHighlight();
-    
+
     if (this.currentMode === 'similar') {
       // 尋找相似元素
       const similarElements = this.findSimilarElements(target);
@@ -493,30 +559,34 @@ class ElementManager {
       return;
     }
     
-    if (this.currentMode === 'multi') {
-      if (e.shiftKey) {
-        // Shift + 點擊 = 刪除所有選中的元素
-        const elements = Array.from(this.selectedElements);
-        if (elements.length > 0) {
-          this.removeElements(elements);
-          this.selectedElements.clear();
-          this.showNotification('deletedMultiple', { count: elements.length });
+    try {
+      if (this.currentMode === 'multi') {
+        if (e.shiftKey) {
+          // Shift + 點擊 = 刪除所有選中的元素
+          const elements = Array.from(this.selectedElements);
+          if (elements.length > 0) {
+            this.removeElements(elements);
+            this.selectedElements.clear();
+          }
+        } else {
+          // 一般點擊 = 選擇元素
+          this.toggleElementSelection(target);
+          // 顯示多重選擇模式的提示
+          if (this.selectedElements.size === 1) {
+            this.showNotification('shiftClickTip');
+          }
+        }
+      } else if (this.currentMode === 'similar') {
+        const similarElements = this.findSimilarElements(target);
+        if (similarElements.length > 0) {
+          this.removeElements(similarElements);
         }
       } else {
-        // 一般點擊 = 選擇元素
-        this.toggleElementSelection(target);
-        // 顯示多重選擇模式的提示
-        if (this.selectedElements.size === 1) {
-          this.showNotification('multiSelectHint');
-        }
+        // 單一模式
+        this.removeElements([target]);
       }
-    } else if (this.currentMode === 'similar') {
-      const similarElements = this.findSimilarElements(target);
-      this.removeElements(similarElements);
-      this.showNotification('deletedSimilar', { count: similarElements.length });
-    } else {
-      this.removeElements([target]);
-      this.showNotification('deleted');
+    } catch (error) {
+      console.error('Error handling click:', error);
     }
   }
 
@@ -551,55 +621,106 @@ class ElementManager {
   }
 
   removeElements(elements) {
-    let validElements = elements.filter(element => this.isValidTarget(element));
-    
-    validElements.forEach(element => {
-      // 克隆元素前先移除所有事件監聽器
-      const clone = element.cloneNode(true);
+    try {
+      const validElements = elements.filter(element => this.isValidTarget(element));
       
-      // 移除所有內聯事件處理器
-      const allElements = [clone, ...clone.getElementsByTagName('*')];
-      allElements.forEach(el => {
-        const attrs = el.attributes;
-        for (let i = attrs.length - 1; i >= 0; i--) {
-          const attrName = attrs[i].name.toLowerCase();
-          if (attrName.startsWith('on')) {
-            el.removeAttribute(attrName);
-          }
+      if (validElements.length === 0) {
+        return;
+      }
+      
+      validElements.forEach(element => {
+        // 保存元素的原始狀態
+        const elementInfo = {
+          element: element,
+          parent: element.parentNode,
+          nextSibling: element.nextSibling,
+          html: element.outerHTML
+        };
+        
+        // 從 DOM 中移除元素
+        if (element.parentNode) {
+          element.parentNode.removeChild(element);
+          
+          // 將元素添加到已移除列表
+          this.removedElements.set(element, elementInfo);
+          
+          // 清除選中狀態
+          this.selectedElements.delete(element);
         }
       });
       
-      // 存儲原始元素信息
-      const elementInfo = {
-        element: clone,
-        parent: element.parentNode,
-        nextSibling: element.nextSibling,
-        html: element.outerHTML,
-        originalElement: element
-      };
-      
-      // 移除原始元素
-      this.removedElements.set(element, elementInfo);
-      
-      // 使用克隆元素替換原始元素，這樣可以保留視覺效果但移除所有事件
-      element.parentNode.replaceChild(clone, element);
-      
-      // 如果啟用了規則保存
-      if (this.settings.rememberRules) {
-        this.saveRemovalRule(element);
+      // 顯示通知
+      if (validElements.length === 1) {
+        this.showNotification('elementRemoved');
+      } else {
+        this.showNotification('elementsRemoved', { count: validElements.length });
       }
-    });
+      
+      // 清除高亮
+      this.clearHighlight();
+      
+    } catch (error) {
+      console.error('Error removing elements:', error);
+    }
   }
 
   undo() {
-    const lastRemoved = Array.from(this.removedElements.values()).pop();
-    if (lastRemoved) {
-      if (lastRemoved.nextSibling) {
-        lastRemoved.parent.insertBefore(lastRemoved.element, lastRemoved.nextSibling);
-      } else {
-        lastRemoved.parent.appendChild(lastRemoved.element);
+    try {
+      const entries = Array.from(this.removedElements.entries());
+      const lastEntry = entries.pop();
+      
+      if (!lastEntry) {
+        this.showNotification('noMoreUndo');
+        return;
       }
-      this.removedElements.delete(lastRemoved.element);
+      
+      const [element, info] = lastEntry;
+      
+      // 恢復元素
+      if (info.nextSibling) {
+        info.parent.insertBefore(info.element, info.nextSibling);
+      } else {
+        info.parent.appendChild(info.element);
+      }
+      
+      // 從移除列表中刪除
+      this.removedElements.delete(element);
+      
+      // 添加到重做堆疊
+      this.redoStack.set(element, info);
+      
+      this.showNotification('undoSuccess');
+    } catch (error) {
+      console.error('Error undoing:', error);
+    }
+  }
+
+  redo() {
+    try {
+      const entries = Array.from(this.redoStack.entries());
+      const lastEntry = entries.pop();
+      
+      if (!lastEntry) {
+        this.showNotification('noMoreRedo');
+        return;
+      }
+      
+      const [element, info] = lastEntry;
+      
+      // 重新移除元素
+      if (element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
+      
+      // 從重做堆疊中刪除
+      this.redoStack.delete(element);
+      
+      // 添加回移除列表
+      this.removedElements.set(element, info);
+      
+      this.showNotification('redoSuccess');
+    } catch (error) {
+      console.error('Error redoing:', error);
     }
   }
 
@@ -670,12 +791,25 @@ class ElementManager {
 
   highlightElement(element) {
     if (element === document.body) return;
-    element.classList.add('element-remover-hover');
+    
+    // 移除任何現有的高亮
+    element.classList.remove('element-remover-hover');
+    element.classList.remove('element-remover-selected');
+    element.classList.remove('element-remover-similar');
+    
+    // 根據當前模式添加適當的高亮
+    if (this.currentMode === 'similar') {
+      element.classList.add('element-remover-similar');
+    } else if (this.selectedElements.has(element)) {
+      element.classList.add('element-remover-selected');
+    } else {
+      element.classList.add('element-remover-hover');
+    }
   }
 
   clearHighlight() {
-    document.querySelectorAll('.element-remover-hover').forEach(el => {
-      el.classList.remove('element-remover-hover');
+    document.querySelectorAll('.element-remover-hover, .element-remover-similar').forEach(el => {
+      el.classList.remove('element-remover-hover', 'element-remover-similar');
     });
   }
 
@@ -696,26 +830,54 @@ class ElementManager {
     this.selectedElements.clear();
     this.clearHighlight();
     
-    // 顯示模式切換提示
-    if (mode === 'multi') {
-      this.showNotification('multiSelectHint');
+    // 更新按鈕狀態
+    if (this.floatingMenu) {
+      const buttons = this.floatingMenu.querySelectorAll('.mode-btn');
+      buttons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.mode === mode) {
+          btn.classList.add('active');
+        }
+      });
     }
+    
+    // 顯示模式切換提示
+    let modeText = '';
+    switch (mode) {
+      case 'single':
+        modeText = this.getText('singleMode');
+        break;
+      case 'multi':
+        modeText = this.getText('multiMode');
+        this.showNotification('shiftClickTip');
+        break;
+      case 'similar':
+        modeText = this.getText('similarMode');
+        break;
+    }
+    this.showNotification('notifications.modeChanged', { mode: modeText });
   }
 
   updateSettings(settings) {
     this.settings = { ...this.settings, ...settings };
   }
 
-  toggleMenu() {
-    console.log('toggleMenu called');  // 添加日誌
+  async toggleMenu() {
+    console.log('toggleMenu called');
+    
+    // 確保語言檔案已載入
+    if (!this.i18n) {
+      console.log('Loading languages first');
+      await this.loadLanguages();
+    }
     
     if (!this.floatingMenu) {
-      console.log('Creating new menu');  // 添加日誌
+      console.log('Creating new menu');
       this.floatingMenu = this.createFloatingMenu();
       this.showMenu();
       this.activate();
     } else {
-      console.log('Toggling existing menu');  // 添加日誌
+      console.log('Toggling existing menu');
       if (this.isMenuVisible) {
         this.hideMenu();
         this.deactivate();
@@ -725,7 +887,7 @@ class ElementManager {
       }
     }
     
-    console.log('Menu visibility:', this.isMenuVisible);  // 添加日誌
+    console.log('Menu visibility:', this.isMenuVisible);
   }
 
   isValidTarget(element) {
@@ -753,23 +915,35 @@ class ElementManager {
   }
 
   getText(key, params = {}) {
-    const keys = key.split('.');
-    let text = this.i18n[this.currentLang];
-    
-    for (const k of keys) {
-      text = text[k];
-      if (!text) {
-        // 如果找不到翻譯，使用英文
-        text = this.i18n['en'];
-        for (const k of keys) {
-          text = text[k];
-        }
-        break;
-      }
+    if (!this.i18n) {
+      console.error('Language data not loaded');
+      return key;  // 返回 key 作為後備
     }
-    
-    // 替換參數
-    return text.replace(/\{(\w+)\}/g, (match, key) => params[key] || match);
+
+    try {
+      const keys = key.split('.');
+      let text = this.i18n[this.currentLang];
+      
+      // 如果當前語言不存在，使用英文
+      if (!text) {
+        text = this.i18n['en'];
+      }
+      
+      // 遍歷鍵值取得翻譯
+      for (const k of keys) {
+        text = text[k];
+        if (!text) {
+          console.warn(`Translation not found for key: ${key}`);
+          return key;  // 返回 key 作為後備
+        }
+      }
+      
+      // 替換參數
+      return text.replace(/\{(\w+)\}/g, (match, key) => params[key] || match);
+    } catch (error) {
+      console.error('Error getting text:', error);
+      return key;  // 返回 key 作為後備
+    }
   }
 
   updateMenuText() {

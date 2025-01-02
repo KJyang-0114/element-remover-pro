@@ -5,6 +5,8 @@
   background-color: rgba(255, 68, 68, 0.1) !important;
   cursor: crosshair !important;
   transition: all 0.2s ease-in-out !important;
+  position: relative !important;
+  z-index: 999999 !important;
 }
 
 /* 選中效果 */
@@ -12,6 +14,8 @@
   outline: 2px solid #2196F3 !important;
   outline-offset: -2px !important;
   background-color: rgba(33, 150, 243, 0.1) !important;
+  position: relative !important;
+  z-index: 999999 !important;
 }
 
 /* 相似元素效果 */
@@ -19,6 +23,8 @@
   outline: 2px dashed #4CAF50 !important;
   outline-offset: -2px !important;
   background-color: rgba(76, 175, 80, 0.1) !important;
+  position: relative !important;
+  z-index: 999999 !important;
 }
 
 /* 浮動選單 */
@@ -35,6 +41,7 @@
   transition: all 0.3s ease !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   overflow: hidden !important;
+  user-select: none !important;
 }
 
 .element-remover-header {
@@ -148,6 +155,7 @@
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   text-align: center !important;
+  position: relative !important;
 }
 
 .mode-btn:hover,
@@ -159,6 +167,24 @@
 .mode-btn.active {
   background: #2196F3 !important;
   color: white !important;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3) !important;
+}
+
+.mode-btn.active::after {
+  content: '✓' !important;
+  position: absolute !important;
+  top: -5px !important;
+  right: -5px !important;
+  background: #4CAF50 !important;
+  color: white !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  font-size: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 2px solid white !important;
 }
 
 /* 開關樣式 */
