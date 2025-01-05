@@ -91,5 +91,5 @@ This extension:
 
 ## Credits
 
-Created by [Your Name/Organization]
-Icon design by [Designer Name/Source] 
+Created by [KJyang-0114](https://github.com/KJyang-0114)
+Icon design by [KJyang-0114](https://github.com/KJyang-0114) 
